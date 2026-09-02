@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../state/app_state.dart';
+import '../widgets/section_header.dart';
 
 // NOT: Test/geliştirme kolaylığı için saniye bazlı — bkz. app_state.dart TODO.
 const List<int> _breakOptions = [15, 30, 45];
@@ -20,11 +21,14 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Mola Süresi (test için saniye)',
-              style: Theme.of(context).textTheme.titleMedium),
+          const SectionHeader(
+            icon: Icons.timer_outlined,
+            text: 'Mola Süresi (test için saniye)',
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
+            runSpacing: 10,
             children: _breakOptions.map((seconds) {
               return ChoiceChip(
                 label: Text('$seconds sn'),
@@ -35,10 +39,11 @@ class SettingsScreen extends ConsumerWidget {
             }).toList(),
           ),
           const SizedBox(height: 24),
-          Text('Günlük Egzersiz Hedefi', style: Theme.of(context).textTheme.titleMedium),
+          const SectionHeader(icon: Icons.flag_outlined, text: 'Günlük Egzersiz Hedefi'),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
+            runSpacing: 10,
             children: _goalOptions.map((count) {
               return ChoiceChip(
                 label: Text('$count egzersiz'),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/fake_data.dart';
 import '../models/body_part.dart';
 import '../screens/body_part_exercises_screen.dart';
+import '../theme/app_colors.dart';
 
 /// Ana sayfada, canı sıkılan kullanıcının kendi seçtiği bir bölgeye
 /// gidebilmesi için vücut bölgelerini kartlar halinde listeler. Bir karta
@@ -39,6 +40,7 @@ class BodyPartGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final bodyPart = bodyParts[index];
+        final color = bodyPart.accentColor;
         return Card(
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -47,16 +49,29 @@ class BodyPartGrid extends StatelessWidget {
                 builder: (_) => BodyPartExercisesScreen(bodyPart: bodyPart),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(left: BorderSide(color: color, width: 4)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  Icon(_icons[bodyPart], color: Colors.teal),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_icons[bodyPart], color: color, size: 19),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       bodyPart.label,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

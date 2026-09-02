@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/body_part.dart';
 import '../models/exercise.dart';
 import '../state/app_state.dart';
+import '../theme/app_colors.dart';
 import 'countdown_timer_circle.dart';
 
 enum _Stage { intro, countdown, exercising }
@@ -108,7 +109,10 @@ class _ExerciseDialogState extends ConsumerState<ExerciseDialog> {
                   onSkip: _skip,
                   onStart: _startCountdown,
                 ),
-              _Stage.countdown => _CountdownStage(value: _countdownValue),
+              _Stage.countdown => _CountdownStage(
+                  value: _countdownValue,
+                  color: exercise.bodyPart.accentColor,
+                ),
               _Stage.exercising => _ExercisingStage(
                   exercise: exercise,
                   remainingSeconds: _exerciseRemaining,
@@ -136,38 +140,66 @@ class _IntroStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = exercise.bodyPart.accentColor;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Icon(Icons.timer_outlined, color: Colors.teal),
+            Icon(Icons.timer_outlined, color: color),
             const SizedBox(width: 8),
             Text('Mola Zamanı!', style: Theme.of(context).textTheme.titleMedium),
           ],
         ),
         const SizedBox(height: 16),
-        Chip(label: Text(exercise.bodyPart.label)),
+        Chip(
+          label: Text(exercise.bodyPart.label),
+          backgroundColor: color.withValues(alpha: 0.15),
+          labelStyle: TextStyle(color: color, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 12),
         Text(exercise.name, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        Text(
-          '${exercise.durationSeconds} saniye',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: Colors.grey.shade600),
+        Row(
+          children: [
+            Icon(Icons.schedule, size: 16, color: Colors.grey.shade600),
+            const SizedBox(width: 6),
+            Text(
+              '${exercise.durationSeconds} saniye',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.grey.shade600),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
-        Text(exercise.instructions, style: Theme.of(context).textTheme.bodyLarge),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, size: 18, color: color),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(exercise.instructions, style: Theme.of(context).textTheme.bodyLarge),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
-        Text(
-          'Bu öneriler tıbbi tavsiye yerine geçmez.',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: Colors.grey.shade500),
+        Row(
+          children: [
+            Icon(Icons.health_and_safety_outlined, size: 14, color: Colors.grey.shade500),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'Bu öneriler tıbbi tavsiye yerine geçmez.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.grey.shade500),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 20),
         Row(
@@ -194,9 +226,10 @@ class _IntroStage extends StatelessWidget {
 }
 
 class _CountdownStage extends StatelessWidget {
-  const _CountdownStage({required this.value});
+  const _CountdownStage({required this.value, required this.color});
 
   final int value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +245,7 @@ class _CountdownStage extends StatelessWidget {
             '$value',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: color,
                 ),
           ),
         ],
@@ -250,6 +283,7 @@ class _ExercisingStage extends StatelessWidget {
           totalSeconds: exercise.durationSeconds,
           size: 160,
           label: remainingSeconds == 0 ? 'süre doldu' : 'kalan süre',
+          color: exercise.bodyPart.accentColor,
         ),
         const SizedBox(height: 16),
         Text(

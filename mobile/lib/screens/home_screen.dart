@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/body_part.dart';
 import '../models/exercise.dart';
 import '../state/app_state.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../widgets/body_part_grid.dart';
 import '../widgets/countdown_timer_circle.dart';
 import '../widgets/exercise_dialog.dart';
+import '../widgets/section_header.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -50,25 +53,51 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Bugünkü İlerleme', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text('$done / $goal egzersiz tamamlandı'),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
                   ],
                 ),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.trending_up_rounded, size: 18, color: Colors.white),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Bugünkü İlerleme',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 10,
+                      backgroundColor: Colors.white.withValues(alpha: 0.25),
+                      valueColor: const AlwaysStoppedAnimation(AppTheme.accentOrange),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$done / $goal egzersiz tamamlandı',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -99,14 +128,20 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Bugün Tamamlananlar', style: Theme.of(context).textTheme.titleMedium),
+            const SectionHeader(icon: Icons.checklist_rounded, text: 'Bugün Tamamlananlar'),
             const SizedBox(height: 8),
             if (state.completedToday.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Henüz egzersiz yapmadın.',
-                  style: TextStyle(color: Colors.grey.shade500),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.grey.shade500),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Henüz egzersiz yapmadın.',
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ],
                 ),
               )
             else
@@ -118,16 +153,21 @@ class HomeScreen extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final exercise =
                       state.completedToday[state.completedToday.length - 1 - index];
+                  final color = exercise.bodyPart.accentColor;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.check_circle, color: Colors.teal),
+                    leading: Icon(Icons.check_circle, color: color),
                     title: Text(exercise.name),
-                    trailing: Chip(label: Text(exercise.bodyPart.label)),
+                    trailing: Chip(
+                      label: Text(exercise.bodyPart.label),
+                      backgroundColor: color.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(color: color, fontWeight: FontWeight.w600),
+                    ),
                   );
                 },
               ),
             const SizedBox(height: 24),
-            Text('Tüm Egzersizler', style: Theme.of(context).textTheme.titleMedium),
+            const SectionHeader(icon: Icons.grid_view_rounded, text: 'Tüm Egzersizler'),
             const SizedBox(height: 4),
             Text(
               'Canın sıkıldığında bir bölge seç, kendi egzersizini yap.',

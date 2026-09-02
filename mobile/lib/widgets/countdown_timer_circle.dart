@@ -10,12 +10,17 @@ class CountdownTimerCircle extends StatelessWidget {
     required this.totalSeconds,
     this.size = 220,
     this.label = 'sıradaki mola',
+    this.color,
   });
 
   final int remainingSeconds;
   final int totalSeconds;
   final double size;
   final String label;
+
+  /// Halkanın rengi. Verilmezse temanın primary rengi kullanılır — egzersiz
+  /// penceresinde bölgeye özel vurgu rengi geçirilerek daha canlı gösterilir.
+  final Color? color;
 
   String get _formatted {
     final minutes = remainingSeconds ~/ 60;
@@ -27,6 +32,7 @@ class CountdownTimerCircle extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = totalSeconds == 0 ? 0.0 : (remainingSeconds / totalSeconds).clamp(0.0, 1.0);
     final colorScheme = Theme.of(context).colorScheme;
+    final ringColor = color ?? colorScheme.primary;
 
     return SizedBox(
       width: size,
@@ -47,7 +53,7 @@ class CountdownTimerCircle extends StatelessWidget {
               strokeWidth: 12,
               strokeCap: StrokeCap.round,
               backgroundColor: Colors.transparent,
-              color: colorScheme.primary,
+              color: ringColor,
             ),
           ),
           Column(

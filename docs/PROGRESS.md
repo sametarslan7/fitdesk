@@ -18,7 +18,7 @@
 
 ## Şu An Neredeyiz
 
-Mola timer'ı artık tamamen kullanıcı kontrolünde (otomatik başlamıyor), egzersiz penceresi 3 aşamalı (Başla → 3-2-1 → egzersiz süresi → Tamamladım), test kolaylığı için mola süresi saniye bazlı (2026-09-02). Sırada: bu özellikleri gerçek telefonda da doğrulamak, kullanıcıdan yeni geri bildirim gelirse onu uygulamak.
+Mola timer'ı artık tamamen kullanıcı kontrolünde (otomatik başlamıyor), egzersiz penceresi 3 aşamalı (Başla → 3-2-1 → egzersiz süresi → Tamamladım), test kolaylığı için mola süresi saniye bazlı (2026-09-02). Aynı gün: renk paleti canlandırıldı — `lib/theme/app_theme.dart` doygun zümrüt yeşili seed + turuncu ikincil renk + özel component temaları (AppBar, Card, buton, chip) kullanıyor; `lib/theme/app_colors.dart` her vücut bölgesine sabit, birbirinden ayrışan bir vurgu rengi atıyor (bölge kartları, "Tamamlananlar" chip'leri, egzersiz penceresindeki geri sayım halkası ve 3-2-1 rakamı artık o bölgenin rengini kullanıyor). Ardından `lib/widgets/section_header.dart` (ortak ikon+başlık widget'ı) eklenerek ana sayfa/ayarlar bölüm başlıklarına ve egzersiz penceresindeki süre/talimat/uyarı satırlarına küçük ikonlar eklendi (2026-09-02). Kullanıcı Chrome'da test edip iki UI hatası bildirdi, ikisi de düzeltildi: (1) `AppTheme`'deki FilledButton/OutlinedButton padding'i sadece dikeydi (`vertical: 14`, yatay padding 0), bu yüzden "Molayı Başlat" gibi metinler kutuya yapışıyordu — `horizontal: 24` eklendi; (2) Ayarlar sayfasındaki `Wrap` seçenekleri (`_breakOptions`, `_goalOptions`) `runSpacing` tanımlamadığından alt satıra taştıklarında birbirine yapışık görünüyordu — `runSpacing: 10` eklendi, chip iç padding'i de büyütüldü. Kullanıcı sonucu Chrome'da onayladı ("çok daha düzgün duruyor"). Sırada: kullanıcıdan yeni geri bildirim gelirse onu uygulamak, sonra gerçek telefonda da doğrulamak.
 
 ## Önemli Not — Şu Anki Öneri Mantığı Gerçek Değil
 
@@ -46,7 +46,9 @@ Mola timer'ı artık tamamen kullanıcı kontrolünde (otomatik başlamıyor), e
 ```
 lib/
   main.dart
-  theme/app_theme.dart
+  theme/
+    app_theme.dart   # ThemeData: canlı seed renk + AppBar/Card/buton/chip temaları
+    app_colors.dart  # BodyPart -> vurgu rengi eşlemesi (BodyPartColor extension)
   models/
     body_part.dart       # BodyPart enum + Türkçe etiketler
     exercise.dart
@@ -60,4 +62,5 @@ lib/
     countdown_timer_circle.dart  # ortadaki yuvarlak geri sayım
     exercise_dialog.dart         # süre bitince/manuel açılan egzersiz penceresi
     body_part_grid.dart          # ana sayfadaki vücut bölgesi kartları
+    section_header.dart          # ikon+başlık bölüm başlığı (ortak widget)
 ```
