@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/fake_data.dart';
+import '../domain/streak.dart';
 import '../models/exercise.dart';
+
+const _goalMetDaysKey = 'goal_met_days';
 
 class UserSettings {
   const UserSettings({
@@ -31,6 +35,7 @@ class AppState {
     required this.completedToday,
     required this.remainingSeconds,
     required this.isTimerRunning,
+    this.goalMetDays = const {},
     this.currentExercise,
   });
 
@@ -38,13 +43,21 @@ class AppState {
   final List<Exercise> completedToday;
   final int remainingSeconds;
   final bool isTimerRunning;
+
+  /// Günlük hedefin tamamlandığı günler (`yyyy-MM-dd`), cihazda saklanır.
+  final Set<String> goalMetDays;
   final Exercise? currentExercise;
+
+  int get streak => calculateStreak(goalMetDays, DateTime.now());
+
+  bool get isGoalMetToday => goalMetDays.contains(dayKey(DateTime.now()));
 
   AppState copyWith({
     UserSettings? settings,
     List<Exercise>? completedToday,
     int? remainingSeconds,
     bool? isTimerRunning,
+    Set<String>? goalMetDays,
     Exercise? currentExercise,
     bool clearCurrentExercise = false,
   }) {
@@ -53,6 +66,7 @@ class AppState {
       completedToday: completedToday ?? this.completedToday,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       isTimerRunning: isTimerRunning ?? this.isTimerRunning,
+      goalMetDays: goalMetDays ?? this.goalMetDays,
       currentExercise:
           clearCurrentExercise ? null : (currentExercise ?? this.currentExercise),
     );
@@ -70,9 +84,30 @@ class AppStateNotifier extends StateNotifier<AppState> {
             // "Molayı Başlat" ile kendisi başlatır.
             isTimerRunning: false,
           ),
-        );
+        ) {
+    _loadGoalMetDays();
+  }
 
   Timer? _ticker;
+
+  Future<void> _loadGoalMetDays() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList(_goalMetDaysKey) ?? const [];
+    if (!mounted) return;
+    state = state.copyWith(goalMetDays: {...state.goalMetDays, ...saved});
+  }
+
+  /// Bugünkü tamamlanan sayısı hedefe ulaştıysa bugünü seriye ekler ve kaydeder.
+  Future<void> _recordGoalIfMet() async {
+    final today = dayKey(DateTime.now());
+    if (state.completedToday.length < state.settings.dailyGoal ||
+        state.goalMetDays.contains(today)) {
+      return;
+    }
+    state = state.copyWith(goalMetDays: {...state.goalMetDays, today});
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_goalMetDaysKey, state.goalMetDays.toList());
+  }
 
   void _startTimer() {
     _ticker?.cancel();
@@ -106,6 +141,7 @@ class AppStateNotifier extends StateNotifier<AppState> {
         dailyGoal: dailyGoal,
       ),
     );
+    if (dailyGoal != null) _recordGoalIfMet();
 
     // Mola süresi değiştiyse ve şu an bekleyen bir egzersiz penceresi yoksa
     // geri sayımı yeni süreyle baştan başlat (sadece sayaç zaten çalışıyorsa).
@@ -164,6 +200,7 @@ class AppStateNotifier extends StateNotifier<AppState> {
       // tekrar "Molayı Başlat" demeli.
       isTimerRunning: false,
     );
+    _recordGoalIfMet();
   }
 
   void skipCurrentExercise() {

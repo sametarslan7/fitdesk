@@ -10,6 +10,7 @@ import '../widgets/body_part_grid.dart';
 import '../widgets/countdown_timer_circle.dart';
 import '../widgets/exercise_dialog.dart';
 import '../widgets/section_header.dart';
+import '../widgets/streak_badge.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -79,6 +80,11 @@ class HomeScreen extends ConsumerWidget {
                             .textTheme
                             .titleMedium
                             ?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                      ),
+                      const Spacer(),
+                      StreakBadge(
+                        streak: state.streak,
+                        isActiveToday: state.isGoalMetToday,
                       ),
                     ],
                   ),
